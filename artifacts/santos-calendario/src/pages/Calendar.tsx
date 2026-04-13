@@ -214,14 +214,14 @@ export default function Calendar() {
       >
         <div
           data-testid="modal-card"
-          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-lg mx-0 sm:mx-4 overflow-hidden max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-4 flex flex-col max-h-[92vh] sm:max-h-[88vh]"
         >
           {selectedDate && (
             <>
-              {/* Modal header */}
+              {/* Modal header — sticky */}
               <div
                 className={[
-                  "px-6 pt-6 pb-4 relative",
+                  "px-6 pt-6 pb-5 relative flex-shrink-0",
                   santo
                     ? "bg-gradient-to-br from-amber-500 to-orange-500"
                     : "bg-gradient-to-br from-gray-300 to-gray-400",
@@ -239,75 +239,69 @@ export default function Calendar() {
                   <X className="w-4 h-4" />
                 </button>
 
-                <p className="text-white/80 text-sm font-medium mb-1 capitalize">
+                <p className="text-white/80 text-sm font-medium mb-1.5 capitalize">
                   {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </p>
 
                 <h3
                   data-testid="text-santo-nome"
-                  className="text-2xl font-bold text-white leading-tight"
+                  className="text-2xl font-bold text-white leading-snug pr-10"
                 >
                   {santo ? santo.nome : "Sem registro"}
                 </h3>
+
+                {/* Virtudes inside header */}
+                {santo && (
+                  <div
+                    data-testid="list-virtudes"
+                    className="flex flex-wrap gap-1.5 mt-3"
+                  >
+                    {santo.virtudes.map((v) => (
+                      <span
+                        key={v}
+                        className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-medium"
+                      >
+                        {v}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Modal body */}
-              <div className="px-6 py-5">
+              {/* Modal body — scrollable */}
+              <div className="flex-1 overflow-y-auto">
                 {santo ? (
-                  <>
-                    {/* Historia */}
-                    <div className="mb-5">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="w-4 h-4 text-amber-600" />
-                        <h4 className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
-                          História
-                        </h4>
-                      </div>
-                      <p
-                        data-testid="text-santo-historia"
-                        className="text-gray-700 text-sm leading-relaxed"
-                      >
-                        {santo.historia}
-                      </p>
+                  <div className="px-6 py-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <BookOpen className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                      <h4 className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
+                        História
+                      </h4>
                     </div>
-
-                    {/* Virtudes */}
-                    <div>
-                      <div className="flex items-center gap-2 mb-3">
-                        <Sparkles className="w-4 h-4 text-amber-600" />
-                        <h4 className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
-                          Principais Virtudes
-                        </h4>
-                      </div>
-                      <div
-                        data-testid="list-virtudes"
-                        className="flex flex-wrap gap-2"
-                      >
-                        {santo.virtudes.map((v) => (
-                          <span
-                            key={v}
-                            className="px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-medium"
-                          >
-                            {v}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center py-6">
-                    <p className="text-gray-500 text-sm">
-                      Nenhum santo registrado para este dia ainda.
+                    <p
+                      data-testid="text-santo-historia"
+                      className="text-gray-700 text-sm leading-relaxed whitespace-pre-line"
+                    >
+                      {santo.historia}
                     </p>
-                    <p className="text-gray-400 text-xs mt-1">
-                      O banco de dados de santos está sendo expandido continuamente.
+                    <p className="mt-4 text-xs text-amber-500 italic">
+                      Fonte: santo.cancaonova.com
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center py-10 px-6">
+                    <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-3">
+                      <BookOpen className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-sm font-medium">
+                      Nenhum santo registrado para este dia ainda.
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Modal footer */}
-              <div className="px-6 pb-6">
+              {/* Modal footer — sticky */}
+              <div className="px-6 py-4 flex-shrink-0 border-t border-amber-100">
                 <button
                   data-testid="button-fechar"
                   onClick={closeModal}

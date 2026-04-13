@@ -80,7 +80,14 @@ function extractSaintData(html) {
     .replace(/\s+/g, ' ')
     .trim();
   
-  const historia = articleHtml.slice(0, 700).trim();
+  // Remove inline section headings (short phrases at sentence boundaries)
+  // and take up to 2500 chars
+  const cleaned = articleHtml
+    .replace(/\b(Origens?|Início|Começo|Breve história|Vida|Morte|Falecimento|Canonização|Beatificação)\s+/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+  
+  const historia = cleaned.slice(0, 2500).trim();
   
   const virtueKeywords = [
     ['humildade', 'Humildade'], ['caridade', 'Caridade'], ['obediência', 'Obediência'],
@@ -96,10 +103,10 @@ function extractSaintData(html) {
   ];
   
   const lowerText = (nome + ' ' + historia).toLowerCase();
-  const found = virtueKeywords.filter(([k]) => lowerText.includes(k)).map(([, v] ) => v).slice(0, 4);
+  const found = [...new Set(virtueKeywords.filter(([k]) => lowerText.includes(k)).map(([, v]) => v))].slice(0, 5);
   
-  if (found.length < 2) found.push('Fé', 'Santidade');
-  const virtudes = found.slice(0, 4);
+  if (found.length < 2) { if (!found.includes('Fé')) found.push('Fé'); if (found.length < 2) found.push('Santidade'); }
+  const virtudes = [...new Set(found)].slice(0, 5);
   
   return { nome, historia, virtudes };
 }
@@ -133,7 +140,7 @@ console.log(`Calendar: ${Object.keys(allDays).length} days`);
 
 // Step 2: Fetch all saint pages with concurrency=15
 const dayKeys = Object.keys(allDays).sort();
-const CONCURRENCY = 15;
+const CONCURRENCY = 20;
 const saintData = {};
 let done = 0;
 let failed = 0;

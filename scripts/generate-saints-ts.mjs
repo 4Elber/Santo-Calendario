@@ -105,8 +105,8 @@ for (const key of Object.keys(rawData)) {
   hist = hist.trim();
   rawData[key].historia = hist;
   
-  // Deduplicate virtues
-  rawData[key].virtudes = [...new Set(d.virtudes || [])].slice(0, 4);
+  // Deduplicate virtues (allow up to 5)
+  rawData[key].virtudes = [...new Set(d.virtudes || [])].slice(0, 5);
   if (rawData[key].virtudes.length < 2) {
     if (!rawData[key].virtudes.includes('Fé')) rawData[key].virtudes.push('Fé');
     if (rawData[key].virtudes.length < 2) rawData[key].virtudes.push('Santidade');
