@@ -272,19 +272,42 @@ export default function Calendar() {
               <div className="flex-1 overflow-y-auto">
                 {santo ? (
                   <div className="px-6 py-6">
-                    <div className="flex items-center gap-2 mb-4">
+                    <div className="flex items-center gap-2 mb-5">
                       <BookOpen className="w-4 h-4 text-amber-600 flex-shrink-0" />
                       <h4 className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
                         História
                       </h4>
                     </div>
-                    <p
+                    <div
                       data-testid="text-santo-historia"
-                      className="text-gray-700 text-sm leading-relaxed whitespace-pre-line"
+                      className="space-y-3"
                     >
-                      {santo.historia}
-                    </p>
-                    <p className="mt-4 text-xs text-amber-500 italic">
+                      {santo.historia.split("\n\n").map((block, i) => {
+                        const trimmed = block.trim();
+                        if (!trimmed) return null;
+                        // Detect headings: short text (< 60 chars), no final period
+                        const isHeading =
+                          trimmed.length < 60 && !trimmed.endsWith(".") && !trimmed.includes("\n");
+                        if (isHeading) {
+                          return (
+                            <p key={i} className="text-amber-700 font-semibold text-sm mt-5 mb-1">
+                              {trimmed}
+                            </p>
+                          );
+                        }
+                        return (
+                          <p key={i} className="text-gray-700 text-sm leading-relaxed">
+                            {trimmed.split("\n").map((line, j) => (
+                              <span key={j}>
+                                {line}
+                                {j < trimmed.split("\n").length - 1 && <br />}
+                              </span>
+                            ))}
+                          </p>
+                        );
+                      })}
+                    </div>
+                    <p className="mt-6 text-xs text-amber-400 italic border-t border-amber-100 pt-4">
                       Fonte: santo.cancaonova.com
                     </p>
                   </div>

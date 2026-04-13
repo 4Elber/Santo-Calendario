@@ -130,14 +130,14 @@ export const santos: Record<string, Santo> = {
 
 for (const key of sortedKeys) {
   const d = rawData[key];
-  const nome = d.nome.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-  const hist = d.historia.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-  const virts = d.virtudes.map(v => `"${v.replace(/"/g, '\\"')}"`).join(', ');
+  const nomeJson = JSON.stringify(d.nome);
+  const histJson = JSON.stringify(d.historia);
+  const virtsJson = JSON.stringify(d.virtudes);
   
-  tsContent += `  "${key}": {\n`;
-  tsContent += `    nome: \`${nome}\`,\n`;
-  tsContent += `    historia: \`${hist}\`,\n`;
-  tsContent += `    virtudes: [${virts}],\n`;
+  tsContent += `  ${JSON.stringify(key)}: {\n`;
+  tsContent += `    nome: ${nomeJson},\n`;
+  tsContent += `    historia: ${histJson},\n`;
+  tsContent += `    virtudes: ${virtsJson},\n`;
   tsContent += `  },\n`;
 }
 

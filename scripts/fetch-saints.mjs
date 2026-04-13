@@ -70,24 +70,45 @@ function extractSaintData(html) {
   const contentStart = html.indexOf('>', entryIdx) + 1;
   let articleHtml = html.slice(contentStart, contentStart + 20000);
   
+  // Remove noise blocks first
   articleHtml = articleHtml
     .replace(/<ul[^>]*id=['"]share-buttons['"][^>]*>[\s\S]*?<\/ul>/gi, '')
     .replace(/<script[\s\S]*?<\/script>/gi, '')
     .replace(/<style[\s\S]*?<\/style>/gi, '')
     .replace(/<figure[\s\S]*?<\/figure>/gi, '')
-    .replace(/<img[^>]*>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<img[^>]*>/gi, '');
+
+  // Convert block-level elements to paragraph breaks BEFORE stripping tags
+  articleHtml = articleHtml
+    .replace(/<\/p>\s*<p[^>]*>/gi, '\n\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<p[^>]*>/gi, '')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/?(h[2-6])[^>]*>/gi, '\n\n')
+    .replace(/<\/div>/gi, '\n')
+    .replace(/<[^>]+>/g, '')        // strip remaining inline tags
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#8220;|&#8221;/g, '"')
+    .replace(/&#8216;|&#8217;/g, "'")
+    .replace(/&#8211;/g, '–')
+    .replace(/&#8212;/g, '—')
+    .replace(/[ \t]+/g, ' ')         // collapse horizontal whitespace
+    .replace(/\n[ \t]+/g, '\n')      // trim leading spaces on each line
+    .replace(/\n{3,}/g, '\n\n')      // collapse excess blank lines
     .trim();
-  
-  // Remove inline section headings (short phrases at sentence boundaries)
-  // and take up to 2500 chars
-  const cleaned = articleHtml
-    .replace(/\b(Origens?|Início|Começo|Breve história|Vida|Morte|Falecimento|Canonização|Beatificação)\s+/gi, '')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-  
-  const historia = cleaned.slice(0, 2500).trim();
+
+  // Take up to ~3000 chars (will be several paragraphs)
+  let historia = articleHtml.slice(0, 3000).trim();
+
+  // If the slice cuts mid-sentence, trim to last sentence
+  const lastPeriod = historia.lastIndexOf('.');
+  if (lastPeriod > 1500) {
+    historia = historia.slice(0, lastPeriod + 1).trim();
+  }
   
   const virtueKeywords = [
     ['humildade', 'Humildade'], ['caridade', 'Caridade'], ['obediência', 'Obediência'],
