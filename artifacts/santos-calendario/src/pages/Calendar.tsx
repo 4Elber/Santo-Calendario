@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   format,
   startOfMonth,
@@ -13,7 +13,7 @@ import {
   isToday,
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, X, BookOpen, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, BookOpen, Sparkles, Search } from "lucide-react";
 import { santos } from "@/data/santos";
 
 function getKey(date: Date): string {
@@ -22,12 +22,29 @@ function getKey(date: Date): string {
   return `${month}-${day}`;
 }
 
+function normalize(str: string) {
+  return str
+    .normalize("NFD")
+    .replace(/\p{Mn}/gu, "")
+    .toLowerCase();
+}
+
 const weekDayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+const MONTH_NAMES = [
+  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
+  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
+];
 
 export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
 
   const today = new Date();
 
@@ -41,6 +58,60 @@ export default function Calendar() {
   while (day <= calendarEnd) {
     days.push(day);
     day = addDays(day, 1);
+  }
+
+  // Search results — filter by name, max 8 results
+  const searchResults = useMemo(() => {
+    const q = normalize(searchQuery.trim());
+    if (q.length < 2) return [];
+    return Object.entries(santos)
+      .filter(([, s]) => normalize(s.nome).includes(q))
+      .sort(([, a], [, b]) => {
+        const ai = normalize(a.nome).indexOf(q);
+        const bi = normalize(b.nome).indexOf(q);
+        return ai - bi;
+      })
+      .slice(0, 8);
+  }, [searchQuery]);
+
+  function openSearch() {
+    setSearchOpen(true);
+    setTimeout(() => searchRef.current?.focus(), 50);
+  }
+
+  function closeSearch() {
+    setSearchOpen(false);
+    setSearchQuery("");
+  }
+
+  // Close search on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        closeSearch();
+      }
+    }
+    if (searchOpen) document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [searchOpen]);
+
+  // Close search on ESC
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.key === "Escape") closeSearch();
+    }
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  function handleSearchSelect(key: string) {
+    const [mm, dd] = key.split("-").map(Number);
+    // Navigate to that month
+    const targetDate = new Date(currentMonth.getFullYear(), mm - 1, dd);
+    setCurrentMonth(new Date(currentMonth.getFullYear(), mm - 1, 1));
+    setSelectedDate(targetDate);
+    setModalOpen(true);
+    closeSearch();
   }
 
   function handleDayClick(date: Date) {
@@ -61,18 +132,88 @@ export default function Calendar() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex flex-col">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white/90 backdrop-blur-md border-b border-amber-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
+      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-amber-100 shadow-sm">
+        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
+          {/* Logo + Title */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md">
               <Sparkles className="w-5 h-5 text-white" />
             </div>
-            <div>
+            <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-amber-900 leading-tight tracking-tight">
                 Calendário dos Santos
               </h1>
               <p className="text-xs text-amber-600 leading-tight">Um santo para cada dia do ano</p>
             </div>
+            <div className="sm:hidden">
+              <h1 className="text-base font-bold text-amber-900 leading-tight">Calendário dos Santos</h1>
+            </div>
+          </div>
+
+          {/* Search bar */}
+          <div ref={searchContainerRef} className="relative flex-1 max-w-sm">
+            {searchOpen ? (
+              <div className="flex items-center gap-2 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 shadow-sm">
+                <Search className="w-4 h-4 text-amber-500 flex-shrink-0" />
+                <input
+                  ref={searchRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Nome do santo..."
+                  className="flex-1 bg-transparent text-sm text-amber-900 placeholder-amber-400 outline-none min-w-0"
+                />
+                <button onClick={closeSearch} className="text-amber-400 hover:text-amber-600 transition-colors flex-shrink-0">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openSearch}
+                className="flex items-center gap-2 bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl px-3 py-2 text-sm text-amber-600 hover:text-amber-800 transition-all w-full shadow-sm hover:shadow"
+              >
+                <Search className="w-4 h-4 flex-shrink-0" />
+                <span className="hidden sm:inline">Pesquisar santo...</span>
+              </button>
+            )}
+
+            {/* Search results dropdown */}
+            {searchOpen && searchQuery.trim().length >= 2 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden z-50">
+                {searchResults.length === 0 ? (
+                  <div className="px-4 py-5 text-center text-sm text-gray-400">
+                    Nenhum santo encontrado para "<span className="font-medium text-amber-600">{searchQuery}</span>"
+                  </div>
+                ) : (
+                  <ul>
+                    {searchResults.map(([key, s], idx) => {
+                      const [mm, dd] = key.split("-");
+                      const monthName = MONTH_NAMES[Number(mm) - 1];
+                      return (
+                        <li key={key}>
+                          <button
+                            onClick={() => handleSearchSelect(key)}
+                            className={[
+                              "w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-amber-50 transition-colors",
+                              idx < searchResults.length - 1 ? "border-b border-amber-50" : "",
+                            ].join(" ")}
+                          >
+                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex flex-col items-center justify-center shadow-sm">
+                              <span className="text-white text-xs font-bold leading-none">{dd}</span>
+                              <span className="text-white/80 text-[9px] uppercase leading-none mt-0.5">{monthName.slice(0, 3)}</span>
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-amber-900 truncate">{s.nome}</p>
+                              <p className="text-xs text-amber-500">{dd} de {monthName}</p>
+                            </div>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -142,7 +283,7 @@ export default function Calendar() {
                     : "hover:shadow-md active:scale-95",
                   isCurrentDay
                     ? "ring-2 ring-amber-500 shadow-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white"
-                    : isSelected && hasSanto
+                    : isSelected
                     ? "bg-amber-100 border-2 border-amber-400"
                     : hasSanto && inMonth
                     ? "bg-white border border-amber-100 hover:border-amber-300 hover:bg-amber-50"
@@ -285,7 +426,6 @@ export default function Calendar() {
                       {santo.historia.split("\n\n").map((block, i) => {
                         const trimmed = block.trim();
                         if (!trimmed) return null;
-                        // Detect headings: short text (< 60 chars), no final period
                         const isHeading =
                           trimmed.length < 60 && !trimmed.endsWith(".") && !trimmed.includes("\n");
                         if (isHeading) {
@@ -297,10 +437,10 @@ export default function Calendar() {
                         }
                         return (
                           <p key={i} className="text-gray-700 text-sm leading-relaxed">
-                            {trimmed.split("\n").map((line, j) => (
+                            {trimmed.split("\n").map((line, j, arr) => (
                               <span key={j}>
                                 {line}
-                                {j < trimmed.split("\n").length - 1 && <br />}
+                                {j < arr.length - 1 && <br />}
                               </span>
                             ))}
                           </p>
