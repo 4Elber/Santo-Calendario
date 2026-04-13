@@ -14,7 +14,7 @@ import {
 } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, X, BookOpen, Sparkles } from "lucide-react";
-import santos from "@/data/santos";
+import { santos } from "@/data/santos";
 
 function getKey(date: Date): string {
   const month = String(date.getMonth() + 1).padStart(2, "0");
