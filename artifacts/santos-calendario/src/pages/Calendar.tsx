@@ -26,6 +26,15 @@ function normalize(str: string) {
   return str.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase();
 }
 
+function extractQuote(historia: string): string {
+  const firstBlock = historia.split("\n\n")[0].trim();
+  const match = firstBlock.match(/^.{50,180}[.!?]/);
+  if (match) return match[0];
+  const shorter = firstBlock.match(/^.{30,}?[.!?]/);
+  if (shorter) return shorter[0];
+  return firstBlock.length > 140 ? firstBlock.slice(0, 140).trimEnd() + "…" : firstBlock;
+}
+
 // 12 distinct month color themes
 const MONTH_THEMES = [
   { // 1 - Janeiro: azul inverno
@@ -592,16 +601,27 @@ export default function Calendar() {
                 </h3>
 
                 {santo && (
-                  <div data-testid="list-virtudes" className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-3">
-                    {santo.virtudes.map((v) => (
-                      <span
-                        key={v}
-                        className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-medium"
-                      >
-                        {v}
-                      </span>
-                    ))}
-                  </div>
+                  <>
+                    <div data-testid="list-virtudes" className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-3">
+                      {santo.virtudes.map((v) => (
+                        <span
+                          key={v}
+                          className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-medium"
+                        >
+                          {v}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Quote */}
+                    <div className="mt-3 px-3 py-2.5 rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm">
+                      <p className="text-white/85 text-xs sm:text-sm leading-relaxed italic">
+                        <span className="text-white/50 text-lg font-serif mr-1 leading-none align-bottom">"</span>
+                        {extractQuote(santo.historia)}
+                        <span className="text-white/50 text-lg font-serif ml-1 leading-none align-bottom">"</span>
+                      </p>
+                    </div>
+                  </>
                 )}
               </div>
 
