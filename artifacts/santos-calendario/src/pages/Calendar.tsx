@@ -565,35 +565,35 @@ export default function Calendar() {
             <>
               {/* Modal header */}
               <div
-                className="px-6 pt-6 pb-5 relative flex-shrink-0"
+                className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0"
                 style={{
                   background: santo ? theme.modalGradient : "linear-gradient(135deg, #9ca3af, #6b7280)",
                 }}
               >
-                <div className="w-10 h-1 rounded-full bg-white/40 mx-auto mb-4 sm:hidden" />
+                <div className="w-8 h-1 rounded-full bg-white/40 mx-auto mb-2 sm:mb-4 sm:hidden" />
 
                 <button
                   data-testid="button-close-modal"
                   onClick={closeModal}
-                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                  className="absolute top-3 right-3 sm:top-5 sm:right-5 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
                   aria-label="Fechar modal"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 </button>
 
-                <p className="text-white/80 text-sm font-medium mb-1.5 capitalize">
+                <p className="text-white/80 text-xs sm:text-sm font-medium mb-1 sm:mb-1.5 capitalize">
                   {format(selectedDate, "EEEE, d 'de' MMMM", { locale: ptBR })}
                 </p>
 
                 <h3
                   data-testid="text-santo-nome"
-                  className="text-2xl font-bold text-white leading-snug pr-10"
+                  className="text-lg sm:text-2xl font-bold text-white leading-snug pr-8 sm:pr-10"
                 >
                   {santo ? santo.nome : "Sem registro"}
                 </h3>
 
                 {santo && (
-                  <div data-testid="list-virtudes" className="flex flex-wrap gap-1.5 mt-3">
+                  <div data-testid="list-virtudes" className="flex flex-wrap gap-1 sm:gap-1.5 mt-2 sm:mt-3">
                     {santo.virtudes.map((v) => (
                       <span
                         key={v}
