@@ -23,30 +23,186 @@ function getKey(date: Date): string {
 }
 
 function normalize(str: string) {
-  return str
-    .normalize("NFD")
-    .replace(/\p{Mn}/gu, "")
-    .toLowerCase();
+  return str.normalize("NFD").replace(/\p{Mn}/gu, "").toLowerCase();
 }
 
-const weekDayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+// 12 distinct month color themes
+const MONTH_THEMES = [
+  { // 1 - Janeiro: azul inverno
+    pageBg: "linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #ecfeff 100%)",
+    primary: "#3b82f6",
+    primaryDark: "#1e40af",
+    primaryLight: "#dbeafe",
+    primaryVeryLight: "#eff6ff",
+    modalGradient: "linear-gradient(135deg, #3b82f6, #0ea5e9)",
+    textDark: "#1e3a8a",
+    textMid: "#2563eb",
+    textLight: "#93c5fd",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#60a5fa",
+  },
+  { // 2 - Fevereiro: rosa
+    pageBg: "linear-gradient(135deg, #fdf2f8 0%, #fce7f3 50%, #fff1f2 100%)",
+    primary: "#ec4899",
+    primaryDark: "#9d174d",
+    primaryLight: "#fce7f3",
+    primaryVeryLight: "#fdf2f8",
+    modalGradient: "linear-gradient(135deg, #ec4899, #f43f5e)",
+    textDark: "#831843",
+    textMid: "#db2777",
+    textLight: "#f9a8d4",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#f472b6",
+  },
+  { // 3 - Março: verde primavera
+    pageBg: "linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #f0fdfa 100%)",
+    primary: "#22c55e",
+    primaryDark: "#14532d",
+    primaryLight: "#dcfce7",
+    primaryVeryLight: "#f0fdf4",
+    modalGradient: "linear-gradient(135deg, #22c55e, #10b981)",
+    textDark: "#14532d",
+    textMid: "#16a34a",
+    textLight: "#86efac",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#4ade80",
+  },
+  { // 4 - Abril: violeta lilás
+    pageBg: "linear-gradient(135deg, #f5f3ff 0%, #faf5ff 50%, #f0f4ff 100%)",
+    primary: "#8b5cf6",
+    primaryDark: "#4c1d95",
+    primaryLight: "#ede9fe",
+    primaryVeryLight: "#f5f3ff",
+    modalGradient: "linear-gradient(135deg, #8b5cf6, #a855f7)",
+    textDark: "#3b0764",
+    textMid: "#7c3aed",
+    textLight: "#c4b5fd",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#a78bfa",
+  },
+  { // 5 - Maio: esmeralda
+    pageBg: "linear-gradient(135deg, #ecfdf5 0%, #f0fdfa 50%, #e0f2fe 100%)",
+    primary: "#10b981",
+    primaryDark: "#065f46",
+    primaryLight: "#d1fae5",
+    primaryVeryLight: "#ecfdf5",
+    modalGradient: "linear-gradient(135deg, #10b981, #14b8a6)",
+    textDark: "#064e3b",
+    textMid: "#059669",
+    textLight: "#6ee7b7",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#34d399",
+  },
+  { // 6 - Junho: amarelo dourado
+    pageBg: "linear-gradient(135deg, #fefce8 0%, #fffbeb 50%, #fef9c3 100%)",
+    primary: "#ca8a04",
+    primaryDark: "#713f12",
+    primaryLight: "#fef3c7",
+    primaryVeryLight: "#fefce8",
+    modalGradient: "linear-gradient(135deg, #ca8a04, #d97706)",
+    textDark: "#713f12",
+    textMid: "#b45309",
+    textLight: "#fde68a",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#fbbf24",
+  },
+  { // 7 - Julho: laranja
+    pageBg: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fef3c7 100%)",
+    primary: "#f97316",
+    primaryDark: "#7c2d12",
+    primaryLight: "#ffedd5",
+    primaryVeryLight: "#fff7ed",
+    modalGradient: "linear-gradient(135deg, #f97316, #f59e0b)",
+    textDark: "#7c2d12",
+    textMid: "#ea580c",
+    textLight: "#fdba74",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#fb923c",
+  },
+  { // 8 - Agosto: vermelho coral
+    pageBg: "linear-gradient(135deg, #fff1f2 0%, #fef2f2 50%, #fff5f5 100%)",
+    primary: "#ef4444",
+    primaryDark: "#7f1d1d",
+    primaryLight: "#fee2e2",
+    primaryVeryLight: "#fff1f2",
+    modalGradient: "linear-gradient(135deg, #ef4444, #f97316)",
+    textDark: "#7f1d1d",
+    textMid: "#dc2626",
+    textLight: "#fca5a5",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#f87171",
+  },
+  { // 9 - Setembro: teal outono
+    pageBg: "linear-gradient(135deg, #f0fdfa 0%, #ecfeff 50%, #e0f2fe 100%)",
+    primary: "#14b8a6",
+    primaryDark: "#134e4a",
+    primaryLight: "#ccfbf1",
+    primaryVeryLight: "#f0fdfa",
+    modalGradient: "linear-gradient(135deg, #14b8a6, #06b6d4)",
+    textDark: "#134e4a",
+    textMid: "#0d9488",
+    textLight: "#5eead4",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#2dd4bf",
+  },
+  { // 10 - Outubro: laranja outonal
+    pageBg: "linear-gradient(135deg, #fff7ed 0%, #fef3c7 50%, #fef2f2 100%)",
+    primary: "#ea580c",
+    primaryDark: "#7c2d12",
+    primaryLight: "#ffedd5",
+    primaryVeryLight: "#fff7ed",
+    modalGradient: "linear-gradient(135deg, #ea580c, #dc2626)",
+    textDark: "#431407",
+    textMid: "#c2410c",
+    textLight: "#fb923c",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#f97316",
+  },
+  { // 11 - Novembro: roxo/índigo outonal
+    pageBg: "linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)",
+    primary: "#6366f1",
+    primaryDark: "#312e81",
+    primaryLight: "#e0e7ff",
+    primaryVeryLight: "#eef2ff",
+    modalGradient: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+    textDark: "#312e81",
+    textMid: "#4f46e5",
+    textLight: "#a5b4fc",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#818cf8",
+  },
+  { // 12 - Dezembro: vermelho natalino
+    pageBg: "linear-gradient(135deg, #fff1f2 0%, #fce7f3 50%, #fdf2f8 100%)",
+    primary: "#dc2626",
+    primaryDark: "#7f1d1d",
+    primaryLight: "#fee2e2",
+    primaryVeryLight: "#fff1f2",
+    modalGradient: "linear-gradient(135deg, #dc2626, #9f1239)",
+    textDark: "#7f1d1d",
+    textMid: "#b91c1c",
+    textLight: "#fca5a5",
+    headerBg: "rgba(255,255,255,0.92)",
+    weekLabelColor: "#f87171",
+  },
+];
 
 const MONTH_NAMES = [
   "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
   "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
 ];
 
+const weekDayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
 export default function Calendar() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
 
-  const today = new Date();
+  const theme = MONTH_THEMES[currentMonth.getMonth()];
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -60,17 +216,12 @@ export default function Calendar() {
     day = addDays(day, 1);
   }
 
-  // Search results — filter by name, max 8 results
   const searchResults = useMemo(() => {
     const q = normalize(searchQuery.trim());
     if (q.length < 2) return [];
     return Object.entries(santos)
       .filter(([, s]) => normalize(s.nome).includes(q))
-      .sort(([, a], [, b]) => {
-        const ai = normalize(a.nome).indexOf(q);
-        const bi = normalize(b.nome).indexOf(q);
-        return ai - bi;
-      })
+      .sort(([, a], [, b]) => normalize(a.nome).indexOf(q) - normalize(b.nome).indexOf(q))
       .slice(0, 8);
   }, [searchQuery]);
 
@@ -84,7 +235,6 @@ export default function Calendar() {
     setSearchQuery("");
   }
 
-  // Close search on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
@@ -95,18 +245,14 @@ export default function Calendar() {
     return () => document.removeEventListener("mousedown", handler);
   }, [searchOpen]);
 
-  // Close search on ESC
   useEffect(() => {
-    function handler(e: KeyboardEvent) {
-      if (e.key === "Escape") closeSearch();
-    }
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeSearch(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
   function handleSearchSelect(key: string) {
     const [mm, dd] = key.split("-").map(Number);
-    // Navigate to that month
     const targetDate = new Date(currentMonth.getFullYear(), mm - 1, dd);
     setCurrentMonth(new Date(currentMonth.getFullYear(), mm - 1, 1));
     setSelectedDate(targetDate);
@@ -126,51 +272,85 @@ export default function Calendar() {
 
   const selectedKey = selectedDate ? getKey(selectedDate) : null;
   const santo = selectedKey ? santos[selectedKey] : null;
-
   const monthLabel = format(currentMonth, "MMMM yyyy", { locale: ptBR });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex flex-col">
+    <div
+      className="min-h-screen flex flex-col transition-all duration-700"
+      style={{ background: theme.pageBg }}
+    >
       {/* Header */}
-      <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-md border-b border-amber-100 shadow-sm">
+      <header
+        className="sticky top-0 z-20 backdrop-blur-md border-b shadow-sm transition-all duration-700"
+        style={{ background: theme.headerBg, borderColor: theme.primaryLight }}
+      >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           {/* Logo + Title */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center shadow-md">
+            <div
+              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-700"
+              style={{ background: theme.modalGradient }}
+            >
               <Sparkles className="w-5 h-5 text-white" />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-amber-900 leading-tight tracking-tight">
+              <h1
+                className="text-xl font-bold leading-tight tracking-tight transition-colors duration-700"
+                style={{ color: theme.textDark }}
+              >
                 Calendário dos Santos
               </h1>
-              <p className="text-xs text-amber-600 leading-tight">Um santo para cada dia do ano</p>
+              <p
+                className="text-xs leading-tight transition-colors duration-700"
+                style={{ color: theme.textMid }}
+              >
+                Um santo para cada dia do ano
+              </p>
             </div>
             <div className="sm:hidden">
-              <h1 className="text-base font-bold text-amber-900 leading-tight">Calendário dos Santos</h1>
+              <h1
+                className="text-base font-bold leading-tight transition-colors duration-700"
+                style={{ color: theme.textDark }}
+              >
+                Calendário dos Santos
+              </h1>
             </div>
           </div>
 
           {/* Search bar */}
           <div ref={searchContainerRef} className="relative flex-1 max-w-sm">
             {searchOpen ? (
-              <div className="flex items-center gap-2 bg-amber-50 border border-amber-300 rounded-xl px-3 py-2 shadow-sm">
-                <Search className="w-4 h-4 text-amber-500 flex-shrink-0" />
+              <div
+                className="flex items-center gap-2 rounded-xl px-3 py-2 shadow-sm border transition-all duration-300"
+                style={{ background: theme.primaryVeryLight, borderColor: theme.primary }}
+              >
+                <Search className="w-4 h-4 flex-shrink-0" style={{ color: theme.primary }} />
                 <input
                   ref={searchRef}
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Nome do santo..."
-                  className="flex-1 bg-transparent text-sm text-amber-900 placeholder-amber-400 outline-none min-w-0"
+                  className="flex-1 bg-transparent text-sm outline-none min-w-0"
+                  style={{ color: theme.textDark }}
                 />
-                <button onClick={closeSearch} className="text-amber-400 hover:text-amber-600 transition-colors flex-shrink-0">
+                <button
+                  onClick={closeSearch}
+                  className="flex-shrink-0 transition-colors"
+                  style={{ color: theme.textLight }}
+                >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <button
                 onClick={openSearch}
-                className="flex items-center gap-2 bg-amber-50 border border-amber-200 hover:border-amber-300 rounded-xl px-3 py-2 text-sm text-amber-600 hover:text-amber-800 transition-all w-full shadow-sm hover:shadow"
+                className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm w-full shadow-sm hover:shadow transition-all border"
+                style={{
+                  background: theme.primaryVeryLight,
+                  borderColor: theme.primaryLight,
+                  color: theme.textMid,
+                }}
               >
                 <Search className="w-4 h-4 flex-shrink-0" />
                 <span className="hidden sm:inline">Pesquisar santo...</span>
@@ -179,10 +359,17 @@ export default function Calendar() {
 
             {/* Search results dropdown */}
             {searchOpen && searchQuery.trim().length >= 2 && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl border border-amber-100 overflow-hidden z-50">
+              <div
+                className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-xl overflow-hidden z-50 border"
+                style={{ borderColor: theme.primaryLight }}
+              >
                 {searchResults.length === 0 ? (
                   <div className="px-4 py-5 text-center text-sm text-gray-400">
-                    Nenhum santo encontrado para "<span className="font-medium text-amber-600">{searchQuery}</span>"
+                    Nenhum santo encontrado para "
+                    <span className="font-medium" style={{ color: theme.primary }}>
+                      {searchQuery}
+                    </span>
+                    "
                   </div>
                 ) : (
                   <ul>
@@ -193,18 +380,25 @@ export default function Calendar() {
                         <li key={key}>
                           <button
                             onClick={() => handleSearchSelect(key)}
-                            className={[
-                              "w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-amber-50 transition-colors",
-                              idx < searchResults.length - 1 ? "border-b border-amber-50" : "",
-                            ].join(" ")}
+                            className="w-full text-left px-4 py-3 flex items-center gap-3 hover:bg-gray-50 transition-colors"
+                            style={idx < searchResults.length - 1 ? { borderBottom: `1px solid ${theme.primaryLight}` } : {}}
                           >
-                            <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-400 flex flex-col items-center justify-center shadow-sm">
+                            <div
+                              className="flex-shrink-0 w-10 h-10 rounded-xl flex flex-col items-center justify-center shadow-sm"
+                              style={{ background: theme.modalGradient }}
+                            >
                               <span className="text-white text-xs font-bold leading-none">{dd}</span>
-                              <span className="text-white/80 text-[9px] uppercase leading-none mt-0.5">{monthName.slice(0, 3)}</span>
+                              <span className="text-white/80 text-[9px] uppercase leading-none mt-0.5">
+                                {monthName.slice(0, 3)}
+                              </span>
                             </div>
                             <div className="min-w-0">
-                              <p className="text-sm font-medium text-amber-900 truncate">{s.nome}</p>
-                              <p className="text-xs text-amber-500">{dd} de {monthName}</p>
+                              <p className="text-sm font-medium truncate" style={{ color: theme.textDark }}>
+                                {s.nome}
+                              </p>
+                              <p className="text-xs" style={{ color: theme.textMid }}>
+                                {dd} de {monthName}
+                              </p>
                             </div>
                           </button>
                         </li>
@@ -223,25 +417,25 @@ export default function Calendar() {
         {/* Month navigation */}
         <div className="flex items-center justify-between mb-6">
           <button
-            data-testid="button-prev-month"
             onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300 transition-all shadow-sm active:scale-95"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm transition-all active:scale-95 border"
+            style={{ borderColor: theme.primaryLight, color: theme.textMid }}
             aria-label="Mês anterior"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
 
           <h2
-            data-testid="text-current-month"
-            className="text-2xl font-bold text-amber-900 capitalize"
+            className="text-2xl font-bold capitalize transition-colors duration-700"
+            style={{ color: theme.textDark }}
           >
             {monthLabel}
           </h2>
 
           <button
-            data-testid="button-next-month"
             onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
-            className="w-10 h-10 rounded-full flex items-center justify-center bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300 transition-all shadow-sm active:scale-95"
+            className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm transition-all active:scale-95 border"
+            style={{ borderColor: theme.primaryLight, color: theme.textMid }}
             aria-label="Próximo mês"
           >
             <ChevronRight className="w-5 h-5" />
@@ -253,7 +447,8 @@ export default function Calendar() {
           {weekDayLabels.map((label) => (
             <div
               key={label}
-              className="text-center text-xs font-semibold text-amber-500 uppercase tracking-wider py-2"
+              className="text-center text-xs font-semibold uppercase tracking-wider py-2 transition-colors duration-700"
+              style={{ color: theme.weekLabelColor }}
             >
               {label}
             </div>
@@ -269,6 +464,27 @@ export default function Calendar() {
             const isCurrentDay = isToday(d);
             const isSelected = selectedDate ? isSameDay(d, selectedDate) : false;
 
+            let cellStyle: React.CSSProperties = {};
+            let textStyle: React.CSSProperties = {};
+
+            if (isCurrentDay) {
+              cellStyle = {
+                background: theme.modalGradient,
+                boxShadow: `0 4px 14px ${theme.primary}55`,
+                border: `2px solid ${theme.primary}`,
+              };
+              textStyle = { color: "#fff" };
+            } else if (isSelected) {
+              cellStyle = { background: theme.primaryLight, border: `2px solid ${theme.primary}` };
+              textStyle = { color: theme.textDark };
+            } else if (hasSanto && inMonth) {
+              cellStyle = { background: "#fff", border: `1px solid ${theme.primaryLight}` };
+              textStyle = { color: theme.textDark };
+            } else {
+              cellStyle = { background: "rgba(255,255,255,0.6)", border: "1px solid transparent" };
+              textStyle = { color: "#9ca3af" };
+            }
+
             return (
               <button
                 key={idx}
@@ -276,37 +492,22 @@ export default function Calendar() {
                 onClick={() => handleDayClick(d)}
                 aria-label={`${format(d, "d 'de' MMMM", { locale: ptBR })}${hasSanto ? ` - ${santos[key].nome}` : ""}`}
                 className={[
-                  "relative flex flex-col items-center justify-center rounded-xl sm:rounded-2xl aspect-square transition-all duration-200 cursor-pointer group",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400",
-                  !inMonth
-                    ? "opacity-30"
-                    : "hover:shadow-md active:scale-95",
-                  isCurrentDay
-                    ? "ring-2 ring-amber-500 shadow-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white"
-                    : isSelected
-                    ? "bg-amber-100 border-2 border-amber-400"
-                    : hasSanto && inMonth
-                    ? "bg-white border border-amber-100 hover:border-amber-300 hover:bg-amber-50"
-                    : "bg-white/60 border border-transparent hover:bg-white/90",
+                  "relative flex flex-col items-center justify-center rounded-xl sm:rounded-2xl aspect-square transition-all duration-200 cursor-pointer",
+                  "focus:outline-none",
+                  !inMonth ? "opacity-30" : "hover:shadow-md active:scale-95",
                 ].join(" ")}
+                style={cellStyle}
               >
-                <span
-                  className={[
-                    "text-sm sm:text-base font-semibold leading-none",
-                    isCurrentDay
-                      ? "text-white"
-                      : hasSanto && inMonth
-                      ? "text-amber-900"
-                      : "text-gray-500",
-                  ].join(" ")}
-                >
+                <span className="text-sm sm:text-base font-semibold leading-none" style={textStyle}>
                   {format(d, "d")}
                 </span>
 
                 {hasSanto && inMonth && !isCurrentDay && (
-                  <span className="mt-1 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-amber-400 group-hover:bg-amber-500 transition-colors" />
+                  <span
+                    className="mt-1 w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full transition-colors"
+                    style={{ background: isSelected ? theme.primary : theme.weekLabelColor }}
+                  />
                 )}
-
                 {isCurrentDay && (
                   <span className="mt-0.5 w-1 h-1 rounded-full bg-white/70" />
                 )}
@@ -316,16 +517,19 @@ export default function Calendar() {
         </div>
 
         {/* Legend */}
-        <div className="mt-6 flex items-center gap-4 justify-center text-xs text-amber-700">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full border-2 border-amber-500 inline-block" />
+        <div className="mt-6 flex items-center gap-4 justify-center text-xs transition-colors duration-700">
+          <span className="flex items-center gap-1.5" style={{ color: theme.textMid }}>
+            <span
+              className="w-3 h-3 rounded-full border-2 inline-block"
+              style={{ borderColor: theme.primary }}
+            />
             Hoje
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+          <span className="flex items-center gap-1.5" style={{ color: theme.textMid }}>
+            <span className="w-2 h-2 rounded-full inline-block" style={{ background: theme.weekLabelColor }} />
             Santo do dia
           </span>
-          <span className="flex items-center gap-1.5">
+          <span className="flex items-center gap-1.5 text-gray-400">
             <span className="w-3 h-3 rounded-md bg-white border border-gray-200 inline-block opacity-40" />
             Sem registro
           </span>
@@ -359,16 +563,13 @@ export default function Calendar() {
         >
           {selectedDate && (
             <>
-              {/* Modal header — sticky */}
+              {/* Modal header */}
               <div
-                className={[
-                  "px-6 pt-6 pb-5 relative flex-shrink-0",
-                  santo
-                    ? "bg-gradient-to-br from-amber-500 to-orange-500"
-                    : "bg-gradient-to-br from-gray-300 to-gray-400",
-                ].join(" ")}
+                className="px-6 pt-6 pb-5 relative flex-shrink-0"
+                style={{
+                  background: santo ? theme.modalGradient : "linear-gradient(135deg, #9ca3af, #6b7280)",
+                }}
               >
-                {/* Handle bar for mobile */}
                 <div className="w-10 h-1 rounded-full bg-white/40 mx-auto mb-4 sm:hidden" />
 
                 <button
@@ -391,12 +592,8 @@ export default function Calendar() {
                   {santo ? santo.nome : "Sem registro"}
                 </h3>
 
-                {/* Virtudes inside header */}
                 {santo && (
-                  <div
-                    data-testid="list-virtudes"
-                    className="flex flex-wrap gap-1.5 mt-3"
-                  >
+                  <div data-testid="list-virtudes" className="flex flex-wrap gap-1.5 mt-3">
                     {santo.virtudes.map((v) => (
                       <span
                         key={v}
@@ -414,15 +611,15 @@ export default function Calendar() {
                 {santo ? (
                   <div className="px-6 py-6">
                     <div className="flex items-center gap-2 mb-5">
-                      <BookOpen className="w-4 h-4 text-amber-600 flex-shrink-0" />
-                      <h4 className="text-sm font-semibold text-amber-700 uppercase tracking-wider">
+                      <BookOpen className="w-4 h-4 flex-shrink-0" style={{ color: theme.primary }} />
+                      <h4
+                        className="text-sm font-semibold uppercase tracking-wider"
+                        style={{ color: theme.textMid }}
+                      >
                         História
                       </h4>
                     </div>
-                    <div
-                      data-testid="text-santo-historia"
-                      className="space-y-3"
-                    >
+                    <div data-testid="text-santo-historia" className="space-y-3">
                       {santo.historia.split("\n\n").map((block, i) => {
                         const trimmed = block.trim();
                         if (!trimmed) return null;
@@ -430,7 +627,11 @@ export default function Calendar() {
                           trimmed.length < 60 && !trimmed.endsWith(".") && !trimmed.includes("\n");
                         if (isHeading) {
                           return (
-                            <p key={i} className="text-amber-700 font-semibold text-sm mt-5 mb-1">
+                            <p
+                              key={i}
+                              className="font-semibold text-sm mt-5 mb-1"
+                              style={{ color: theme.primary }}
+                            >
                               {trimmed}
                             </p>
                           );
@@ -447,7 +648,10 @@ export default function Calendar() {
                         );
                       })}
                     </div>
-                    <p className="mt-6 text-xs text-amber-400 italic border-t border-amber-100 pt-4">
+                    <p
+                      className="mt-6 text-xs italic border-t pt-4"
+                      style={{ color: theme.textLight, borderColor: theme.primaryLight }}
+                    >
                       Fonte: santo.cancaonova.com
                     </p>
                   </div>
@@ -463,12 +667,16 @@ export default function Calendar() {
                 )}
               </div>
 
-              {/* Modal footer — sticky */}
-              <div className="px-6 py-4 flex-shrink-0 border-t border-amber-100">
+              {/* Modal footer */}
+              <div
+                className="px-6 py-4 flex-shrink-0 border-t"
+                style={{ borderColor: theme.primaryLight }}
+              >
                 <button
                   data-testid="button-fechar"
                   onClick={closeModal}
-                  className="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-semibold text-sm transition-colors active:scale-95"
+                  className="w-full py-3 rounded-xl text-white font-semibold text-sm transition-all active:scale-95"
+                  style={{ background: theme.modalGradient }}
                 >
                   Fechar
                 </button>
