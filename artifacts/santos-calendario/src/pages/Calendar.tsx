@@ -553,24 +553,23 @@ export default function Calendar() {
         aria-modal="true"
         aria-label={santo ? `Santo do dia: ${santo.nome}` : "Sem santo registrado"}
         className={[
-          "fixed z-50 left-0 right-0 bottom-0 sm:inset-0 sm:flex sm:items-center sm:justify-center transition-all duration-300",
-          modalOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8 sm:translate-y-4 pointer-events-none",
+          "fixed z-50 inset-0 sm:flex sm:items-center sm:justify-center transition-all duration-300",
+          modalOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full sm:translate-y-4 pointer-events-none",
         ].join(" ")}
       >
         <div
           data-testid="modal-card"
-          className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl mx-0 sm:mx-4 flex flex-col max-h-[92vh] sm:max-h-[88vh]"
+          className="bg-white sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[88vh] mx-0 sm:mx-4 flex flex-col"
         >
           {selectedDate && (
             <>
               {/* Modal header */}
               <div
-                className="px-4 pt-4 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0"
+                className="px-4 pt-10 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0"
                 style={{
                   background: santo ? theme.modalGradient : "linear-gradient(135deg, #9ca3af, #6b7280)",
                 }}
               >
-                <div className="w-8 h-1 rounded-full bg-white/40 mx-auto mb-2 sm:mb-4 sm:hidden" />
 
                 <button
                   data-testid="button-close-modal"
