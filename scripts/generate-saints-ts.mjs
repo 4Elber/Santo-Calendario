@@ -29,6 +29,9 @@ function postRequest(url, data) {
 
 // Load raw data
 const rawData = JSON.parse(fs.readFileSync('scripts/saints-raw.json', 'utf-8'));
+const imagesData = fs.existsSync('scripts/saints-images.json')
+  ? JSON.parse(fs.readFileSync('scripts/saints-images.json', 'utf-8'))
+  : {};
 console.log('Loaded', Object.keys(rawData).length, 'saints from raw JSON');
 
 // Get calendar to know which days have no data (failed fetches)
@@ -123,6 +126,7 @@ export interface Santo {
   nome: string;
   historia: string;
   virtudes: string[];
+  imagem?: string;
 }
 
 export const santos: Record<string, Santo> = {
@@ -133,11 +137,13 @@ for (const key of sortedKeys) {
   const nomeJson = JSON.stringify(d.nome);
   const histJson = JSON.stringify(d.historia);
   const virtsJson = JSON.stringify(d.virtudes);
+  const imgUrl = imagesData[key] || null;
   
   tsContent += `  ${JSON.stringify(key)}: {\n`;
   tsContent += `    nome: ${nomeJson},\n`;
   tsContent += `    historia: ${histJson},\n`;
   tsContent += `    virtudes: ${virtsJson},\n`;
+  if (imgUrl) tsContent += `    imagem: ${JSON.stringify(imgUrl)},\n`;
   tsContent += `  },\n`;
 }
 
