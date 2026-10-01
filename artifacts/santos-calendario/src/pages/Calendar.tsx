@@ -568,24 +568,9 @@ export default function Calendar() {
                 className="px-4 pt-10 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0 overflow-hidden"
                 style={{
                   background: santo ? theme.modalGradient : "linear-gradient(135deg, #9ca3af, #6b7280)",
-                  minHeight: santo?.imagem ? "10rem" : undefined,
                 }}
               >
-                {/* Saint image as blurred background */}
-                {santo?.imagem && (
-                  <>
-                    <img
-                      src={santo.imagem}
-                      alt=""
-                      aria-hidden="true"
-                      className="absolute inset-0 w-full h-full object-cover object-top opacity-30 blur-sm scale-110"
-                    />
-                    <div className="absolute inset-0 bg-black/30" />
-                  </>
-                )}
-
-                {/* Content above image layers */}
-                <div className="relative z-10">
+                <div>
                   <button
                     data-testid="button-close-modal"
                     onClick={closeModal}
@@ -663,6 +648,26 @@ export default function Calendar() {
                         );
                       })}
                     </div>
+                    {santo.imagem && (
+                      <figure className="mt-8">
+                        <figcaption
+                          className="text-sm font-semibold uppercase tracking-wider mb-3"
+                          style={{ color: theme.textMid }}
+                        >
+                          Imagem
+                        </figcaption>
+                        <div className="rounded-2xl border overflow-hidden bg-gray-50 flex justify-center"
+                          style={{ borderColor: theme.primaryLight }}
+                        >
+                          <img
+                            src={santo.imagem}
+                            alt={`Imagem de ${santo.nome}`}
+                            loading="lazy"
+                            className="block max-h-[28rem] max-w-full object-contain"
+                          />
+                        </div>
+                      </figure>
+                    )}
                     <p
                       className="mt-6 text-xs italic border-t pt-4"
                       style={{ color: theme.textLight, borderColor: theme.primaryLight }}
