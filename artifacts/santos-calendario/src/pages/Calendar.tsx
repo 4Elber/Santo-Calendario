@@ -238,6 +238,8 @@ export default function Calendar() {
     setSearchQuery("");
   }
 
+  const isMouseDownOnBackdrop = useRef(false);
+
   useEffect(() => {
     function handler(e: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
@@ -249,10 +251,18 @@ export default function Calendar() {
   }, [searchOpen]);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeSearch(); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (modalOpen) {
+          closeModal();
+        } else if (searchOpen) {
+          closeSearch();
+        }
+      }
+    };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, []);
+  }, [modalOpen, searchOpen]);
 
   function handleSearchSelect(key: string) {
     const [mm, dd] = key.split("-").map(Number);
@@ -326,6 +336,17 @@ export default function Calendar() {
   function closeModal() {
     setModalOpen(false);
     setTimeout(() => setSelectedDate(null), 300);
+  }
+
+  function handleBackdropMouseDown(e: React.MouseEvent) {
+    isMouseDownOnBackdrop.current = (e.target === e.currentTarget);
+  }
+
+  function handleBackdropClick(e: React.MouseEvent) {
+    if (isMouseDownOnBackdrop.current && e.target === e.currentTarget) {
+      closeModal();
+    }
+    isMouseDownOnBackdrop.current = false;
   }
 
   const selectedKey = selectedDate ? getKey(selectedDate) : null;
@@ -607,13 +628,16 @@ export default function Calendar() {
         role="dialog"
         aria-modal="true"
         aria-label={santo ? `Santo do dia: ${santo.nome}` : "Sem santo registrado"}
+        onMouseDown={handleBackdropMouseDown}
+        onClick={handleBackdropClick}
         className={[
           "fixed z-50 inset-0 sm:flex sm:items-center sm:justify-center transition-all duration-300",
-          modalOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-full sm:translate-y-4 pointer-events-none",
+          modalOpen ? "opacity-100 translate-y-0 pointer-events-auto" : "opacity-0 translate-y-full sm:translate-y-4 pointer-events-none",
         ].join(" ")}
       >
         <div
           data-testid="modal-card"
+          onClick={(e) => e.stopPropagation()}
           className="bg-white sm:rounded-3xl shadow-2xl w-full sm:max-w-2xl h-full sm:h-auto sm:max-h-[88vh] mx-0 sm:mx-4 flex flex-col"
         >
           {selectedDate && (
