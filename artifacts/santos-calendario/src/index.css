@@ -297,3 +297,15 @@
     inset: -1px;
   }
 }
+
+/* Oculta o badge "Powered by Netlify" injetado pelo plano gratuito */
+[data-netlify-widget],
+#netlify-badge,
+.netlify-badge,
+a[href*="netlify.com"][style*="position: fixed"],
+a[href*="netlify.com"][style*="position:fixed"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}

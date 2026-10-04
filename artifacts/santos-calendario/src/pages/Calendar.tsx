@@ -286,7 +286,7 @@ export default function Calendar() {
       >
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           {/* Logo + Title */}
-          <div className="flex items-center gap-2 flex-shrink-0">
+          <div className={`flex items-center gap-2 flex-shrink-0 ${searchOpen ? 'hidden sm:flex' : ''}`}>
             <div
               className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-700"
               style={{ background: theme.modalGradient }}
@@ -318,7 +318,7 @@ export default function Calendar() {
           </div>
 
           {/* Search bar */}
-          <div ref={searchContainerRef} className="relative flex-1 max-w-sm">
+          <div ref={searchContainerRef} className={`relative transition-all duration-300 ${searchOpen ? 'flex-1 w-full' : 'flex-1 max-w-sm'}`}>
             {searchOpen ? (
               <div
                 className="flex items-center gap-2 rounded-xl px-3 py-2 shadow-sm border transition-all duration-300"
@@ -534,6 +534,13 @@ export default function Calendar() {
             Sem registro
           </span>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-12 mb-4 text-center">
+          <p className="text-sm font-medium tracking-wide text-red-600 uppercase">
+            TODOS OS DIREITOS SÃO RESERVADOS A CANÇÃO NOVA
+          </p>
+        </footer>
       </main>
 
       {/* Modal overlay */}
