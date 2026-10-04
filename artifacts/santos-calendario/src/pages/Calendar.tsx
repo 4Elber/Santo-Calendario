@@ -201,6 +201,9 @@ export default function Calendar() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwipingRef = useRef(false);
 
   const theme = MONTH_THEMES[currentMonth.getMonth()];
 
@@ -260,7 +263,62 @@ export default function Calendar() {
     closeSearch();
   }
 
+  function handlePrevMonth() {
+    setCurrentMonth((prev) => subMonths(prev, 1));
+  }
+
+  function handleNextMonth() {
+    setCurrentMonth((prev) => addMonths(prev, 1));
+  }
+
+  function handleTouchStart(e: React.TouchEvent) {
+    if (modalOpen || searchOpen) return;
+    if (e.touches.length === 1) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+    }
+  }
+
+  function handleTouchEnd(e: React.TouchEvent) {
+    if (modalOpen || searchOpen) return;
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    if (e.changedTouches.length !== 1) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+
+    const deltaX = touchEndX - touchStartX.current;
+    const deltaY = touchEndY - touchStartY.current;
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+
+    const minSwipeDistance = 45;
+
+    // Must be predominantly horizontal gesture to avoid triggering on vertical scroll
+    if (Math.abs(deltaX) > minSwipeDistance && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+      isSwipingRef.current = true;
+      setTimeout(() => {
+        isSwipingRef.current = false;
+      }, 150);
+
+      if (deltaX < 0) {
+        // Swiped left -> Next month
+        handleNextMonth();
+      } else {
+        // Swiped right -> Previous month
+        handlePrevMonth();
+      }
+    }
+  }
+
+  function handleTouchCancel() {
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }
+
   function handleDayClick(date: Date) {
+    if (isSwipingRef.current) return;
     setSelectedDate(date);
     setModalOpen(true);
   }
@@ -405,11 +463,16 @@ export default function Calendar() {
       </header>
 
       {/* Calendar */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6">
+      <main
+        className="flex-1 max-w-5xl mx-auto w-full px-4 pt-6 pb-12 touch-pan-y"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
+      >
         {/* Month navigation */}
         <div className="flex items-center justify-between mb-6">
           <button
-            onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
+            onClick={handlePrevMonth}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm transition-all active:scale-95 border"
             style={{ borderColor: theme.primaryLight, color: theme.textMid }}
             aria-label="Mês anterior"
@@ -425,7 +488,7 @@ export default function Calendar() {
           </h2>
 
           <button
-            onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
+            onClick={handleNextMonth}
             className="w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm transition-all active:scale-95 border"
             style={{ borderColor: theme.primaryLight, color: theme.textMid }}
             aria-label="Próximo mês"
@@ -526,13 +589,6 @@ export default function Calendar() {
             Sem registro
           </span>
         </div>
-
-        {/* Footer */}
-        <footer className="mt-12 mb-4 text-center">
-          <p className="text-sm font-medium tracking-wide text-red-600 uppercase">
-            TODOS OS DIREITOS SÃO RESERVADOS A CANÇÃO NOVA
-          </p>
-        </footer>
       </main>
 
       {/* Modal overlay */}
