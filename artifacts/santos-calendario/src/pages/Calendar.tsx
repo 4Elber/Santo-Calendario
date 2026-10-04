@@ -288,32 +288,24 @@ export default function Calendar() {
           {/* Logo + Title */}
           <div className={`flex items-center gap-2 flex-shrink-0 ${searchOpen ? 'hidden sm:flex' : ''}`}>
             <div
-              className="w-9 h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-700"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shadow-md transition-all duration-700 flex-shrink-0"
               style={{ background: theme.modalGradient }}
             >
-              <Sparkles className="w-5 h-5 text-white" />
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <h1
-                className="text-xl font-bold leading-tight tracking-tight transition-colors duration-700"
+                className="text-sm sm:text-xl font-bold leading-tight tracking-tight transition-colors duration-700"
                 style={{ color: theme.textDark }}
               >
                 Calendário dos Santos
               </h1>
               <p
-                className="text-xs leading-tight transition-colors duration-700"
+                className="hidden sm:block text-xs leading-tight transition-colors duration-700"
                 style={{ color: theme.textMid }}
               >
                 Um santo para cada dia do ano
               </p>
-            </div>
-            <div className="sm:hidden">
-              <h1
-                className="text-base font-bold leading-tight transition-colors duration-700"
-                style={{ color: theme.textDark }}
-              >
-                Calendário dos Santos
-              </h1>
             </div>
           </div>
 
@@ -426,7 +418,7 @@ export default function Calendar() {
           </button>
 
           <h2
-            className="text-2xl font-bold capitalize transition-colors duration-700"
+            className="text-xl sm:text-2xl font-bold capitalize transition-colors duration-700"
             style={{ color: theme.textDark }}
           >
             {monthLabel}
@@ -517,7 +509,7 @@ export default function Calendar() {
         </div>
 
         {/* Legend */}
-        <div className="mt-6 flex items-center gap-4 justify-center text-xs transition-colors duration-700">
+        <div className="mt-6 flex flex-wrap items-center gap-3 sm:gap-4 justify-center text-xs transition-colors duration-700">
           <span className="flex items-center gap-1.5" style={{ color: theme.textMid }}>
             <span
               className="w-3 h-3 rounded-full border-2 inline-block"
@@ -572,7 +564,7 @@ export default function Calendar() {
             <>
               {/* Modal header */}
               <div
-                className="px-4 pt-10 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0 overflow-hidden"
+                className="px-4 pt-12 pb-3 sm:px-6 sm:pt-6 sm:pb-5 relative flex-shrink-0 overflow-hidden"
                 style={{
                   background: santo ? theme.modalGradient : "linear-gradient(135deg, #9ca3af, #6b7280)",
                 }}
@@ -581,7 +573,7 @@ export default function Calendar() {
                   <button
                     data-testid="button-close-modal"
                     onClick={closeModal}
-                    className="absolute top-0 right-0 sm:-top-1 sm:-right-1 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
+                    className="absolute top-3 right-3 sm:-top-1 sm:-right-1 w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white transition-colors"
                     aria-label="Fechar modal"
                   >
                     <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
